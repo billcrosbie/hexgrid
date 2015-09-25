@@ -83,7 +83,11 @@ namespace HexGrid
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            // TODO: Add your update logic here
+            var mouse = Mouse.GetState();
+            var pointer = new Point(mouse.X, mouse.Y);
+            var tile = CalculateTile(pointer, scrollOffset, leftHexWidth, hexagonHeight, topHexagonHeight, hexagonSlope);
+
+            Window.Title = tile.X + " " + tile.Y;
 
             base.Update(gameTime);
         }
@@ -113,6 +117,38 @@ namespace HexGrid
             spriteBatch.End();
 
             base.Draw(gameTime);
+        } // draw
+
+
+        private static Point CalculateTile(Point pointer, Vector2 offset, int halfWidth, int height, int halfHeight, float slope)
+        {
+            int offsetAdjustedX = (int)(pointer.X - offset.X);
+            int tileX = offsetAdjustedX / halfWidth;
+            int alternate = tileX % 2;
+            int offsetAdjustedY = (int)(pointer.Y - offset.Y) - (alternate * halfHeight);
+            int tileY = (offsetAdjustedY / height);
+            
+            
+            // locate the tile in a rectangle grid
+            int tileXOffset = (offsetAdjustedX - (tileX * halfWidth)) % halfWidth;
+            int tileYOffset = (offsetAdjustedY -(tileY * height)) % height;
+
+            // adjust the values as necessary for slope
+
+            if (tileXOffset * slope < (-tileYOffset + halfHeight))
+            {
+                tileX -= 1;
+            }
+            if (tileXOffset * slope < (tileYOffset - halfHeight))
+            {
+                tileX -= 1;
+                tileY += 1;
+            }
+            var tile = new Point(tileX, tileY);
+
+            return tile;
         }
-    }
+
+
+    }// hexGrid
 }
